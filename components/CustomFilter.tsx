@@ -2,40 +2,37 @@
 
 import { Fragment, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { Listbox, Transition } from "@headlessui/react";
-
 import { CustomFilterProps } from "@/types";
-import { updateSearchParams } from "@/utils";
 
 
-export default function CustomFilter({ title, options }: CustomFilterProps) {
-  const router = useRouter();
-  const [selected, setSelected] = useState(options[0]); // State for storing the selected option
-
-  // update the URL search parameters and navigate to the new URL
-  const handleUpdateParams = (e: { title: string; value: string }) => {
-  const newPathName = updateSearchParams(title, e.value.toLowerCase());
-
-    router.push(newPathName);
-  };
+export default function CustomFilter<T>({
+  options,
+  setFilter,
+}: CustomFilterProps<T>) {
+  const [menu, setMenu] = useState(options[0]); // State for storing the selected option
 
   return (
     <div className='w-fit'>
       <Listbox
-        value={selected}
+        value={menu}
         onChange={(e) => {
-          setSelected(e); // Update the selected option in state
-          handleUpdateParams(e); // Update the URL search parameters and navigate to the new URL
+          setMenu(e);
+          setFilter(e.value as unknown as T); // Update the selected option in state
         }}
       >
         <div className='relative w-fit z-10'>
           {/* Button for the listbox */}
           <Listbox.Button className='custom-filter__btn'>
-            <span className='block truncate'>{selected.title}</span>
-            <Image src='/chevron-up-down.svg' width={20} height={20} className='ml-4 object-contain' alt='chevron_up-down' />
+            <span className='block truncate'>{menu.title}</span>
+            <Image
+              src='/chevron-up-down.svg'
+              width={20}
+              height={20}
+              className='ml-4 object-contain'
+              alt='chevron_up-down'
+            />
           </Listbox.Button>
-
           {/* Transition for displaying the options */}
           <Transition
             as={Fragment} // group multiple elements without introducing an additional DOM node i.e., <></>
@@ -44,7 +41,7 @@ export default function CustomFilter({ title, options }: CustomFilterProps) {
             leaveTo='opacity-0'
           >
             <Listbox.Options className='custom-filter__options'>
-              {/* Map over the options and display them as listbox options */}
+              {/* Map over the options and display them as listbox options  */}
               {options.map((option) => (
                 <Listbox.Option
                   key={option.title}
@@ -57,7 +54,12 @@ export default function CustomFilter({ title, options }: CustomFilterProps) {
                 >
                   {({ selected }) => (
                     <>
-                      <span className={`block truncate ${selected ? "font-medium" : "font-normal"}`} >
+                      {/* Display the option title */}
+                      <span
+                        className={`block truncate ${
+                          selected ? "font-medium" : "font-normal"
+                        }`}
+                      >
                         {option.title}
                       </span>
                     </>
@@ -69,5 +71,5 @@ export default function CustomFilter({ title, options }: CustomFilterProps) {
         </div>
       </Listbox>
     </div>
-  )
+  );
 }
